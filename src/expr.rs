@@ -1,5 +1,6 @@
+use crate::error::Error;
 use proc_macro::{
-    token_stream, Delimiter, Ident, Literal, Punct, Spacing, TokenStream, TokenTree,
+    token_stream, Delimiter, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree,
 };
 use std::iter::Peekable;
 
@@ -11,20 +12,21 @@ pub enum Expr {
     And(Vec<Expr>),
 }
 
-pub fn parse(args: TokenStream) -> Expr {
+pub fn parse(args: TokenStream) -> Result<Expr, Error> {
     let mut iter = args.into_iter().peekable();
     parse_disjunction(&mut iter)
 }
 
 type Iter<'a> = &'a mut Peekable<token_stream::IntoIter>;
 
-fn parse_disjunction(iter: Iter) -> Expr {
-    let conjunction = parse_conjunction(iter);
+fn parse_disjunction(iter: Iter) -> Result<Expr, Error> {
+    let conjunction = parse_conjunction(iter)?;
     let mut vec = vec![conjunction];
     loop {
         match iter.peek() {
             Some(TokenTree::Punct(punct)) if punct.as_char() == '|' => {
                 let spacing = punct.spacing();
+                let span = punct.span();
                 let _ = iter.next().unwrap();
                 if spacing != Spacing::Joint
                     || match iter.next() {
@@ -32,30 +34,35 @@ fn parse_disjunction(iter: Iter) -> Expr {
                         _ => true,
                     }
                 {
-                    panic!("expected ||");
+                    return Err(Error::new(span, "expected ||"));
                 }
-                let conjunction = parse_conjunction(iter);
+                let conjunction = parse_conjunction(iter)?;
                 vec.push(conjunction);
             }
             None => break,
             Some(TokenTree::Punct(punct)) if punct.as_char() == ',' => break,
-            Some(_unexpected) => panic!("unexpected token"),
+            Some(unexpected) => {
+                let span = unexpected.span();
+                return Err(Error::new(span, "unexpected token"));
+            }
         }
     }
-    if vec.len() == 1 {
+    let expr = if vec.len() == 1 {
         vec.remove(0)
     } else {
         Expr::Or(vec)
-    }
+    };
+    Ok(expr)
 }
 
-fn parse_conjunction(iter: Iter) -> Expr {
-    let atom = parse_atom(iter);
+fn parse_conjunction(iter: Iter) -> Result<Expr, Error> {
+    let atom = parse_atom(iter)?;
     let mut vec = vec![atom];
     loop {
         match iter.peek() {
             Some(TokenTree::Punct(punct)) if punct.as_char() == '&' => {
                 let spacing = punct.spacing();
+                let span = punct.span();
                 let _ = iter.next().unwrap();
                 if spacing != Spacing::Joint
                     || match iter.next() {
@@ -63,48 +70,62 @@ fn parse_conjunction(iter: Iter) -> Expr {
                         _ => true,
                     }
                 {
-                    panic!("expected &&");
+                    return Err(Error::new(span, "expected &&"));
                 }
-                let atom = parse_atom(iter);
+                let atom = parse_atom(iter)?;
                 vec.push(atom);
             }
             _ => break,
         }
     }
-    if vec.len() == 1 {
+    let expr = if vec.len() == 1 {
         vec.remove(0)
     } else {
         Expr::And(vec)
-    }
+    };
+    Ok(expr)
 }
 
-fn parse_atom(iter: Iter) -> Expr {
+fn parse_atom(iter: Iter) -> Result<Expr, Error> {
     match iter.next() {
         Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Parenthesis => {
             let mut iter = group.stream().into_iter().peekable();
-            let expr = parse_disjunction(&mut iter);
-            if iter.next().is_some() {
-                panic!("unexpected token");
+            let expr = parse_disjunction(&mut iter)?;
+            if let Some(unexpected) = iter.next() {
+                let span = unexpected.span();
+                return Err(Error::new(span, "unexpected token"));
             }
-            expr
+            Ok(expr)
         }
         Some(TokenTree::Ident(ident)) => match iter.peek() {
             Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {
                 let punct = punct.clone();
                 let _ = iter.next().unwrap();
                 match iter.next() {
-                    Some(TokenTree::Literal(literal)) => Expr::Equal(ident, punct, literal),
-                    Some(_unexpected) => panic!("unexpected token"),
-                    None => panic!("expected a literal"),
+                    Some(TokenTree::Literal(literal)) => Ok(Expr::Equal(ident, punct, literal)),
+                    Some(unexpected) => {
+                        let span = unexpected.span();
+                        Err(Error::new(span, "unexpected token"))
+                    }
+                    None => {
+                        let span = Span::call_site();
+                        Err(Error::new(span, "expected a literal"))
+                    }
                 }
             }
-            _ => Expr::Ident(ident),
+            _ => Ok(Expr::Ident(ident)),
         },
         Some(TokenTree::Punct(punct)) if punct.as_char() == '!' => {
-            let atom = parse_atom(iter);
-            Expr::Not(Box::new(atom))
+            let atom = parse_atom(iter)?;
+            Ok(Expr::Not(Box::new(atom)))
         }
-        Some(_unexpected) => panic!("expected an identifier"),
-        None => panic!("unexpected end of input"),
+        Some(unexpected) => {
+            let span = unexpected.span();
+            Err(Error::new(span, "expected an identifier"))
+        }
+        None => {
+            let span = Span::call_site();
+            Err(Error::new(span, "unexpected end of input"))
+        }
     }
 }

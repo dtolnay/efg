@@ -1,3 +1,4 @@
+mod error;
 mod expr;
 
 use crate::expr::Expr;
@@ -6,8 +7,10 @@ use std::iter::{self, FromIterator};
 
 #[proc_macro_attribute]
 pub fn efg(args: TokenStream, input: TokenStream) -> TokenStream {
-    let expr = expr::parse(args);
-    render(expr, input)
+    match expr::parse(args) {
+        Ok(expr) => render(expr, input),
+        Err(error) => error.compile_error(),
+    }
 }
 
 fn render(expr: Expr, input: TokenStream) -> TokenStream {
