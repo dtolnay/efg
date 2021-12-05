@@ -48,10 +48,7 @@ fn parse_disjunction(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
             }
             None => break,
             Some(TokenTree::Punct(punct)) if punct.as_char() == ',' => break,
-            Some(unexpected) => {
-                let span = unexpected.span();
-                return Err(Error::new(span, "unexpected token"));
-            }
+            Some(unexpected) => return Err(unexpected_token(unexpected, "unexpected token")),
         }
     }
     let node = if vec.len() == 1 {
@@ -99,8 +96,7 @@ fn parse_atom(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
             let mut iter = group.stream().into_iter().peekable();
             let node = parse_disjunction(&mut iter, Some(&group))?;
             if let Some(unexpected) = iter.next() {
-                let span = unexpected.span();
-                return Err(Error::new(span, "unexpected token"));
+                return Err(unexpected_token(&unexpected, "unexpected token"));
             }
             Ok(node)
         }
@@ -110,10 +106,10 @@ fn parse_atom(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
                 let _ = iter.next().unwrap();
                 match iter.next() {
                     Some(TokenTree::Literal(literal)) => Ok(Node::Equal(ident, punct, literal)),
-                    Some(unexpected) => {
-                        let span = unexpected.span();
-                        Err(Error::new(span, "unexpected token, expected a literal"))
-                    }
+                    Some(unexpected) => Err(unexpected_token(
+                        &unexpected,
+                        "unexpected token, expected a literal",
+                    )),
                     None => {
                         let span = Span::call_site();
                         Err(Error::new(span, "expected a literal"))
@@ -126,10 +122,10 @@ fn parse_atom(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
             let atom = parse_atom(iter, ctx)?;
             Ok(Node::Not(Box::new(atom)))
         }
-        Some(unexpected) => {
-            let span = unexpected.span();
-            Err(Error::new(span, "expected an identifier"))
-        }
+        Some(unexpected) => Err(unexpected_token(
+            &unexpected,
+            "unexpected token, expected an identifier",
+        )),
         None => {
             if let Some(group) = ctx {
                 let span = group.span_close();
@@ -140,4 +136,9 @@ fn parse_atom(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
             }
         }
     }
+}
+
+fn unexpected_token(unexpected: &TokenTree, msg: &str) -> Error {
+    let span = unexpected.span();
+    Error::new(span, msg)
 }
