@@ -154,6 +154,23 @@ fn parse_atom_after_ident(ident: Ident, iter: Iter, ctx: Ctx) -> Result<Node, Er
                 }
             }
             match iter.next() {
+                Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::None => {
+                    let mut inner = group.stream().into_iter();
+                    let literal = match inner.next() {
+                        Some(TokenTree::Literal(literal)) => literal,
+                        unexpected => {
+                            let unexpected = unexpected.unwrap_or(TokenTree::Group(group));
+                            return Err(unexpected_token(
+                                &unexpected,
+                                "unexpected token, expected a literal",
+                            ));
+                        }
+                    };
+                    if let Some(unexpected) = inner.next() {
+                        return Err(unexpected_token(&unexpected, "unexpected token"));
+                    }
+                    Ok(Node::Equal(ident, punct, literal))
+                }
                 Some(TokenTree::Literal(literal)) => Ok(Node::Equal(ident, punct, literal)),
                 Some(unexpected) => Err(unexpected_token(
                     &unexpected,

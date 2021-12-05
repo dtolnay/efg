@@ -44,3 +44,14 @@ macro_rules! with_ident {
 }
 
 with_ident!(windows);
+
+macro_rules! with_literal {
+    ($expr:expr) => {
+        t! {
+            #[efg(feature = $expr)]
+            #[cfg(feature = "std")]
+        }
+    };
+}
+
+with_literal!("std");
