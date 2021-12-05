@@ -1,0 +1,5 @@
+error: expected ||
+ --> tests/ui/expected-or.rs:3:12
+  |
+3 | #[efg(unix |= windows)]
+  |            ^^
