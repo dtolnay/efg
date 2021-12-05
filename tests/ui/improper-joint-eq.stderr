@@ -1,0 +1,5 @@
+error: expected `=`
+ --> tests/ui/improper-joint-eq.rs:3:15
+  |
+3 | #[efg(feature => "std")]
+  |               ^^
