@@ -6,10 +6,8 @@ error: unexpected end of input
   |
   = note: this error originates in the attribute macro `efg` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: unexpected end of input
- --> tests/ui/end-after-operator.rs:6:1
+error: expected an identifier
+ --> tests/ui/end-after-operator.rs:6:15
   |
 6 | #[efg((unix ||) && window)]
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `efg` (in Nightly builds, run with -Z macro-backtrace for more info)
+  |               ^
