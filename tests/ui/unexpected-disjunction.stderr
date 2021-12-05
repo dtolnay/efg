@@ -1,0 +1,5 @@
+error: unexpected token
+ --> tests/ui/unexpected-disjunction.rs:3:12
+  |
+3 | #[efg(unix + windows)]
+  |            ^
