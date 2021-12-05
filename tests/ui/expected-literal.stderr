@@ -1,0 +1,5 @@
+error: unexpected token, expected a literal
+ --> tests/ui/expected-literal.rs:3:17
+  |
+3 | #[efg(feature = STD)]
+  |                 ^^^

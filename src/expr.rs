@@ -111,7 +111,7 @@ fn parse_atom(iter: Iter) -> Result<Node, Error> {
                     Some(TokenTree::Literal(literal)) => Ok(Node::Equal(ident, punct, literal)),
                     Some(unexpected) => {
                         let span = unexpected.span();
-                        Err(Error::new(span, "unexpected token"))
+                        Err(Error::new(span, "unexpected token, expected a literal"))
                     }
                     None => {
                         let span = Span::call_site();
