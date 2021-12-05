@@ -4,22 +4,28 @@ use proc_macro::{
 };
 use std::iter::Peekable;
 
-pub enum Expr {
+pub struct Expr {
+    pub node: Node,
+    pub rest: Peekable<token_stream::IntoIter>,
+}
+
+pub enum Node {
     Ident(Ident),
     Equal(Ident, Punct, Literal),
-    Not(Box<Expr>),
-    Or(Vec<Expr>),
-    And(Vec<Expr>),
+    Not(Box<Node>),
+    Or(Vec<Node>),
+    And(Vec<Node>),
 }
 
 pub fn parse(args: TokenStream) -> Result<Expr, Error> {
     let mut iter = args.into_iter().peekable();
-    parse_disjunction(&mut iter)
+    let node = parse_disjunction(&mut iter)?;
+    Ok(Expr { node, rest: iter })
 }
 
 type Iter<'a> = &'a mut Peekable<token_stream::IntoIter>;
 
-fn parse_disjunction(iter: Iter) -> Result<Expr, Error> {
+fn parse_disjunction(iter: Iter) -> Result<Node, Error> {
     let conjunction = parse_conjunction(iter)?;
     let mut vec = vec![conjunction];
     loop {
@@ -47,15 +53,15 @@ fn parse_disjunction(iter: Iter) -> Result<Expr, Error> {
             }
         }
     }
-    let expr = if vec.len() == 1 {
+    let node = if vec.len() == 1 {
         vec.remove(0)
     } else {
-        Expr::Or(vec)
+        Node::Or(vec)
     };
-    Ok(expr)
+    Ok(node)
 }
 
-fn parse_conjunction(iter: Iter) -> Result<Expr, Error> {
+fn parse_conjunction(iter: Iter) -> Result<Node, Error> {
     let atom = parse_atom(iter)?;
     let mut vec = vec![atom];
     loop {
@@ -78,31 +84,31 @@ fn parse_conjunction(iter: Iter) -> Result<Expr, Error> {
             _ => break,
         }
     }
-    let expr = if vec.len() == 1 {
+    let node = if vec.len() == 1 {
         vec.remove(0)
     } else {
-        Expr::And(vec)
+        Node::And(vec)
     };
-    Ok(expr)
+    Ok(node)
 }
 
-fn parse_atom(iter: Iter) -> Result<Expr, Error> {
+fn parse_atom(iter: Iter) -> Result<Node, Error> {
     match iter.next() {
         Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Parenthesis => {
             let mut iter = group.stream().into_iter().peekable();
-            let expr = parse_disjunction(&mut iter)?;
+            let node = parse_disjunction(&mut iter)?;
             if let Some(unexpected) = iter.next() {
                 let span = unexpected.span();
                 return Err(Error::new(span, "unexpected token"));
             }
-            Ok(expr)
+            Ok(node)
         }
         Some(TokenTree::Ident(ident)) => match iter.peek() {
             Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {
                 let punct = punct.clone();
                 let _ = iter.next().unwrap();
                 match iter.next() {
-                    Some(TokenTree::Literal(literal)) => Ok(Expr::Equal(ident, punct, literal)),
+                    Some(TokenTree::Literal(literal)) => Ok(Node::Equal(ident, punct, literal)),
                     Some(unexpected) => {
                         let span = unexpected.span();
                         Err(Error::new(span, "unexpected token"))
@@ -113,11 +119,11 @@ fn parse_atom(iter: Iter) -> Result<Expr, Error> {
                     }
                 }
             }
-            _ => Ok(Expr::Ident(ident)),
+            _ => Ok(Node::Ident(ident)),
         },
         Some(TokenTree::Punct(punct)) if punct.as_char() == '!' => {
             let atom = parse_atom(iter)?;
-            Ok(Expr::Not(Box::new(atom)))
+            Ok(Node::Not(Box::new(atom)))
         }
         Some(unexpected) => {
             let span = unexpected.span();
