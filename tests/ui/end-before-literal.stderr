@@ -1,0 +1,15 @@
+error: expected a literal
+ --> tests/ui/end-before-literal.rs:3:1
+  |
+3 | #[efg(feature =)]
+  | ^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `efg` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: expected a literal
+ --> tests/ui/end-before-literal.rs:6:1
+  |
+6 | #[efg((feature =) || unix)]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `efg` (in Nightly builds, run with -Z macro-backtrace for more info)
