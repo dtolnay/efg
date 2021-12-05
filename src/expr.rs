@@ -96,65 +96,17 @@ fn parse_atom(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
             if group.delimiter() == Delimiter::Parenthesis
                 || group.delimiter() == Delimiter::None =>
         {
-            let mut iter = group.stream().into_iter().peekable();
-            let node = parse_disjunction(&mut iter, Some(&group))?;
-            if let Some(unexpected) = iter.next() {
+            let mut inner = group.stream().into_iter().peekable();
+            let node = parse_disjunction(&mut inner, Some(&group))?;
+            if let Some(unexpected) = inner.next() {
                 return Err(unexpected_token(&unexpected, "unexpected token"));
             }
-            Ok(node)
-        }
-        Some(TokenTree::Ident(ident)) => {
-            let negate_span = match iter.peek() {
-                Some(TokenTree::Punct(punct))
-                    if punct.as_char() == '!' && punct.spacing() == Spacing::Joint =>
-                {
-                    Some(iter.next().unwrap().span())
-                }
-                _ => None,
-            };
-            match iter.peek() {
-                Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {
-                    let punct = punct.clone();
-                    let _ = iter.next().unwrap();
-                    if punct.spacing() == Spacing::Joint {
-                        if let Some(span) = negate_span {
-                            return Err(Error::new(span, "expected `!=`"));
-                        }
-                        match iter.next() {
-                            Some(TokenTree::Punct(punct))
-                                if punct.as_char() == '=' && punct.spacing() == Spacing::Alone => {}
-                            _ => {
-                                let span = punct.span();
-                                return Err(Error::new(span, "expected `=`"));
-                            }
-                        }
-                    }
-                    match iter.next() {
-                        Some(TokenTree::Literal(literal)) => Ok(Node::Equal(ident, punct, literal)),
-                        Some(unexpected) => Err(unexpected_token(
-                            &unexpected,
-                            "unexpected token, expected a literal",
-                        )),
-                        None => {
-                            if let Some(group) = ctx {
-                                let span = group.span_close();
-                                Err(Error::new(span, "expected a literal"))
-                            } else {
-                                let span = Span::call_site();
-                                Err(Error::new(span, "unexpected end of input"))
-                            }
-                        }
-                    }
-                }
-                _ => {
-                    if let Some(span) = negate_span {
-                        Err(Error::new(span, "expected `=`"))
-                    } else {
-                        Ok(Node::Ident(ident))
-                    }
-                }
+            match (group.delimiter(), node) {
+                (Delimiter::None, Node::Ident(ident)) => parse_atom_after_ident(ident, iter, ctx),
+                (_delimiter, node) => Ok(node),
             }
         }
+        Some(TokenTree::Ident(ident)) => parse_atom_after_ident(ident, iter, ctx),
         Some(TokenTree::Punct(punct)) if punct.as_char() == '!' => {
             let atom = parse_atom(iter, ctx)?;
             Ok(Node::Not(Box::new(atom)))
@@ -170,6 +122,59 @@ fn parse_atom(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
             } else {
                 let span = Span::call_site();
                 Err(Error::new(span, "unexpected end of input"))
+            }
+        }
+    }
+}
+
+fn parse_atom_after_ident(ident: Ident, iter: Iter, ctx: Ctx) -> Result<Node, Error> {
+    let negate_span = match iter.peek() {
+        Some(TokenTree::Punct(punct))
+            if punct.as_char() == '!' && punct.spacing() == Spacing::Joint =>
+        {
+            Some(iter.next().unwrap().span())
+        }
+        _ => None,
+    };
+    match iter.peek() {
+        Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {
+            let punct = punct.clone();
+            let _ = iter.next().unwrap();
+            if punct.spacing() == Spacing::Joint {
+                if let Some(span) = negate_span {
+                    return Err(Error::new(span, "expected `!=`"));
+                }
+                match iter.next() {
+                    Some(TokenTree::Punct(punct))
+                        if punct.as_char() == '=' && punct.spacing() == Spacing::Alone => {}
+                    _ => {
+                        let span = punct.span();
+                        return Err(Error::new(span, "expected `=`"));
+                    }
+                }
+            }
+            match iter.next() {
+                Some(TokenTree::Literal(literal)) => Ok(Node::Equal(ident, punct, literal)),
+                Some(unexpected) => Err(unexpected_token(
+                    &unexpected,
+                    "unexpected token, expected a literal",
+                )),
+                None => {
+                    if let Some(group) = ctx {
+                        let span = group.span_close();
+                        Err(Error::new(span, "expected a literal"))
+                    } else {
+                        let span = Span::call_site();
+                        Err(Error::new(span, "unexpected end of input"))
+                    }
+                }
+            }
+        }
+        _ => {
+            if let Some(span) = negate_span {
+                Err(Error::new(span, "expected `=`"))
+            } else {
+                Ok(Node::Ident(ident))
             }
         }
     }

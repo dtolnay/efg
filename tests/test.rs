@@ -29,13 +29,18 @@ t! {
     #[cfg(any(unix, windows))]
 }
 
-macro_rules! with_expr {
+macro_rules! with_ident {
     ($expr:expr) => {
         t! {
             #[efg(unix || $expr)]
             #[cfg(any(unix, windows))]
         }
+
+        t! {
+            #[efg($expr = "yes")]
+            #[cfg(windows = "yes")]
+        }
     };
 }
 
-with_expr!(windows);
+with_ident!(windows);
