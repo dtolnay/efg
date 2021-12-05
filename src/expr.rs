@@ -37,8 +37,8 @@ fn parse_disjunction(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
                 let spacing = punct.spacing();
                 let span = punct.span();
                 let _ = iter.next().unwrap();
-                if spacing != Spacing::Joint
-                    || match iter.next() {
+                if spacing == Spacing::Joint
+                    && match iter.next() {
                         Some(TokenTree::Punct(second)) => second.as_char() != '|',
                         _ => true,
                     }
@@ -70,8 +70,8 @@ fn parse_conjunction(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
                 let spacing = punct.spacing();
                 let span = punct.span();
                 let _ = iter.next().unwrap();
-                if spacing != Spacing::Joint
-                    || match iter.next() {
+                if spacing == Spacing::Joint
+                    && match iter.next() {
                         Some(TokenTree::Punct(second)) => second.as_char() != '&',
                         _ => true,
                     }
