@@ -104,6 +104,16 @@ fn parse_atom(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
             Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {
                 let punct = punct.clone();
                 let _ = iter.next().unwrap();
+                if punct.spacing() == Spacing::Joint {
+                    match iter.next() {
+                        Some(TokenTree::Punct(punct))
+                            if punct.as_char() == '=' && punct.spacing() == Spacing::Alone => {}
+                        _ => {
+                            let span = punct.span();
+                            return Err(Error::new(span, "expected `=`"));
+                        }
+                    }
+                }
                 match iter.next() {
                     Some(TokenTree::Literal(literal)) => Ok(Node::Equal(ident, punct, literal)),
                     Some(unexpected) => Err(unexpected_token(
