@@ -1,0 +1,5 @@
+error: unexpected token
+ --> tests/ui/unexpected-in-group.rs:3:23
+  |
+3 | #[efg(unix || (windows, wasm))]
+  |                       ^
