@@ -121,8 +121,13 @@ fn parse_atom(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
                         "unexpected token, expected a literal",
                     )),
                     None => {
-                        let span = Span::call_site();
-                        Err(Error::new(span, "expected a literal"))
+                        if let Some(group) = ctx {
+                            let span = group.span_close();
+                            Err(Error::new(span, "expected a literal"))
+                        } else {
+                            let span = Span::call_site();
+                            Err(Error::new(span, "unexpected end of input"))
+                        }
                     }
                 }
             }
