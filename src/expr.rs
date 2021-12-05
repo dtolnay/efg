@@ -41,7 +41,7 @@ fn parse_disjunction(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
                         _ => true,
                     }
                 {
-                    return Err(Error::new(span, "expected ||"));
+                    return Err(Error::new(span, "expected `||`"));
                 }
                 let conjunction = parse_conjunction(iter, ctx)?;
                 vec.push(conjunction);
@@ -74,7 +74,7 @@ fn parse_conjunction(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
                         _ => true,
                     }
                 {
-                    return Err(Error::new(span, "expected &&"));
+                    return Err(Error::new(span, "expected `&&`"));
                 }
                 let atom = parse_atom(iter, ctx)?;
                 vec.push(atom);

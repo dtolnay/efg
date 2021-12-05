@@ -1,4 +1,4 @@
-error: expected &&
+error: expected `&&`
  --> tests/ui/expected-and.rs:3:12
   |
 3 | #[efg(unix &= windows)]
