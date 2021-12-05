@@ -192,6 +192,10 @@ fn parse_atom_after_ident(ident: Ident, iter: Iter, ctx: Ctx) -> Result<Node, Er
         _ => {
             if let Some(span) = negate_span {
                 Err(Error::new(span, "expected `=`"))
+            } else if ident.to_string() == "true" {
+                Ok(Node::And(Vec::new()))
+            } else if ident.to_string() == "false" {
+                Ok(Node::Or(Vec::new()))
             } else {
                 Ok(Node::Ident(ident))
             }
