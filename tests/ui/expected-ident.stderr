@@ -1,0 +1,5 @@
+error: expected an identifier
+ --> tests/ui/expected-ident.rs:3:15
+  |
+3 | #[efg(unix || "false")]
+  |               ^^^^^^^
