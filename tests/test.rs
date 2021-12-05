@@ -28,3 +28,14 @@ t! {
     #[efg(unix || windows)]
     #[cfg(any(unix, windows))]
 }
+
+macro_rules! with_expr {
+    ($expr:expr) => {
+        t! {
+            #[efg(unix || $expr)]
+            #[cfg(any(unix, windows))]
+        }
+    };
+}
+
+with_expr!(windows);

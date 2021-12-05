@@ -92,7 +92,10 @@ fn parse_conjunction(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
 
 fn parse_atom(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
     match iter.next() {
-        Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Parenthesis => {
+        Some(TokenTree::Group(group))
+            if group.delimiter() == Delimiter::Parenthesis
+                || group.delimiter() == Delimiter::None =>
+        {
             let mut iter = group.stream().into_iter().peekable();
             let node = parse_disjunction(&mut iter, Some(&group))?;
             if let Some(unexpected) = iter.next() {
