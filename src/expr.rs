@@ -139,6 +139,9 @@ fn parse_atom(iter: Iter, ctx: Ctx) -> Result<Node, Error> {
 }
 
 fn unexpected_token(unexpected: &TokenTree, msg: &str) -> Error {
-    let span = unexpected.span();
+    let span = match unexpected {
+        TokenTree::Group(group) => group.span_open(),
+        _ => unexpected.span(),
+    };
     Error::new(span, msg)
 }

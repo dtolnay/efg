@@ -2,4 +2,4 @@ error: unexpected token, expected an identifier
  --> tests/ui/non-paren-group.rs:3:15
   |
 3 | #[efg(unix || [...])]
-  |               ^^^^^
+  |               ^
