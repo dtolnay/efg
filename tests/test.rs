@@ -31,6 +31,17 @@ t! {
     #[cfg(any(unix, windows))]
 }
 
+t! {
+    #[efg(
+        !(target_arch = "wasm32" && (target_os = "unknown" || target_os = "wasi"))
+        && feature = "proc-macro"
+    )]
+    #[cfg(all(
+        not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
+        feature = "proc-macro"
+    ))]
+}
+
 macro_rules! with_ident {
     ($expr:expr) => {
         t! {
