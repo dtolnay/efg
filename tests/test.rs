@@ -1,3 +1,5 @@
+#![allow(clippy::manual_assert)]
+
 use efg::efg;
 
 macro_rules! t {
