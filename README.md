@@ -11,7 +11,7 @@ Conditional compilation using boolean expression syntax, rather than *any()*,
 
 ```toml
 [dependencies]
-efg = "0.0"
+efg = "0.1"
 ```
 
 <br>
