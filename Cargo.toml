@@ -3,6 +3,12 @@ name = "efg"
 version = "0.0.0"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
+rust-version = "1.55"
+license = "MIT OR Apache-2.0"
+description = "Conditional compilation using boolean expression syntax, rather than any(), all(), not()."
+repository = "https://github.com/dtolnay/efg"
+documentation = "https://docs.rs/efg"
+readme = "README.md"
 
 [lib]
 proc-macro = true
