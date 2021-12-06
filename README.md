@@ -35,8 +35,8 @@ instead:&ensp;`&&`,&ensp;`||`,&ensp;`!`&ensp;as usual in Rust syntax.
 
 <table>
 <tr><th><center>built into rustc</center></th><th><center>this crate</center></th></tr>
-<tr><td><code>#[cfg(any(<i>thing1</i>, <i>thing2</i>, &hellip;)]</code></td><td><code>#[efg(<i>thing1</i> || <i>thing2</i> || &hellip;)]</code></td></tr>
-<tr><td><code>#[cfg(all(<i>thing1</i>, <i>thing2</i>, &hellip;)]</code></td><td><code>#[efg(<i>thing1</i> &amp;&amp; <i>thing2</i> &amp;&amp; &hellip;)]</code></td></tr>
+<tr><td><code>#[cfg(any(<i>thing1</i>, <i>thing2</i>, &hellip;))]</code></td><td><code>#[efg(<i>thing1</i> || <i>thing2</i> || &hellip;)]</code></td></tr>
+<tr><td><code>#[cfg(all(<i>thing1</i>, <i>thing2</i>, &hellip;))]</code></td><td><code>#[efg(<i>thing1</i> &amp;&amp; <i>thing2</i> &amp;&amp; &hellip;)]</code></td></tr>
 <tr><td><code>#[cfg(not(<i>thing</i>))]</code></td><td><code>#[efg(!<i>thing</i>)]</code></td></tr>
 </table>
 
