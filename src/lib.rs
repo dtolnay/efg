@@ -40,6 +40,8 @@
 //! A real-world example from the `quote` crate:
 //!
 //! ```
+//! # use efg::efg;
+//! #
 //! #[efg(feature = "proc-macro" && !(target_arch = "wasm32" && target_os = "unknown"))]
 //! extern crate proc_macro;
 //! ```
@@ -47,8 +49,17 @@
 //! and from the `proc-macro2` crate:
 //!
 //! ```
+//! # use efg::efg;
+//! #
+//! # struct Span;
+//! # struct LineColumn;
+//! #
+//! # impl Span {
 //! #[efg(super_unstable || feature = "span-locations")]
 //! pub fn start(&self) -> LineColumn {
+//! # unimplemented!()
+//! # }
+//! # }
 //! ```
 
 mod error;
