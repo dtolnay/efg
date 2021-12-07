@@ -164,7 +164,7 @@ fn parse_atom_after_ident(ident: Ident, iter: Iter, ctx: Ctx) -> Result<Node, Er
                             let unexpected = unexpected.unwrap_or(TokenTree::Group(group));
                             return Err(unexpected_token(
                                 &unexpected,
-                                "unexpected token, expected a literal",
+                                "unexpected token, expected a string literal",
                             ));
                         }
                     };
@@ -176,12 +176,12 @@ fn parse_atom_after_ident(ident: Ident, iter: Iter, ctx: Ctx) -> Result<Node, Er
                 Some(TokenTree::Literal(literal)) => Ok(Node::Equal(ident, punct, literal)),
                 Some(unexpected) => Err(unexpected_token(
                     &unexpected,
-                    "unexpected token, expected a literal",
+                    "unexpected token, expected a string literal",
                 )),
                 None => {
                     if let Some(group) = ctx {
                         let span = group.span_close();
-                        Err(Error::new(span, "expected a literal"))
+                        Err(Error::new(span, "expected a string literal"))
                     } else {
                         let span = Span::call_site();
                         Err(Error::new(span, "unexpected end of input"))

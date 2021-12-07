@@ -6,7 +6,7 @@ error: unexpected end of input
   |
   = note: this error originates in the attribute macro `efg` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: expected a literal
+error: expected a string literal
  --> tests/ui/end-before-literal.rs:6:17
   |
 6 | #[efg((feature =) || unix)]
