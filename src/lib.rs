@@ -42,7 +42,7 @@
 //! ```
 //! # use efg::efg;
 //! #
-//! #[efg(feature = "proc-macro" && !(target_arch = "wasm32" && target_os = "unknown"))]
+//! #[efg(feature "proc-macro" && !(target_arch "wasm32" && target_os "unknown"))]
 //! extern crate proc_macro;
 //! ```
 //!
@@ -55,7 +55,7 @@
 //! # struct LineColumn;
 //! #
 //! # impl Span {
-//! #[efg(super_unstable || feature = "span-locations")]
+//! #[efg(super_unstable || feature "span-locations")]
 //! pub fn start(&self) -> LineColumn {
 //! # unimplemented!()
 //! # }

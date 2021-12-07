@@ -47,14 +47,14 @@ instead:&ensp;`&&`,&ensp;`||`,&ensp;`!`&ensp;as usual in Rust syntax.
 A real-world example from the `quote` crate:
 
 ```rust
-#[efg(feature = "proc-macro" && !(target_arch = "wasm32" && target_os = "unknown"))]
+#[efg(feature "proc-macro" && !(target_arch "wasm32" && target_os "unknown"))]
 extern crate proc_macro;
 ```
 
 and from the `proc-macro2` crate:
 
 ```rust
-#[efg(super_unstable || feature = "span-locations")]
+#[efg(super_unstable || feature "span-locations")]
 pub fn start(&self) -> LineColumn {
 ```
 

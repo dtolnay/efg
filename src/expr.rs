@@ -139,6 +139,11 @@ fn parse_atom_after_ident(ident: Ident, iter: Iter, ctx: Ctx) -> Result<Node, Er
         _ => None,
     };
     let punct = match iter.peek() {
+        Some(TokenTree::Literal(_) | TokenTree::Group(_)) => {
+            let mut punct = Punct::new('=', Spacing::Alone);
+            punct.set_span(ident.span());
+            punct
+        }
         Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {
             let punct = punct.clone();
             let _ = iter.next().unwrap();
