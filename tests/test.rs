@@ -33,8 +33,8 @@ t! {
 
 t! {
     #[efg(
-        !(target_arch = "wasm32" && (target_os = "unknown" || target_os = "wasi"))
-        && feature = "proc-macro"
+        !(target_arch "wasm32" && (target_os "unknown" || target_os "wasi"))
+        && feature "proc-macro"
     )]
     #[cfg(all(
         not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
@@ -50,7 +50,7 @@ macro_rules! with_ident {
         }
 
         t! {
-            #[efg($expr = "yes")]
+            #[efg($expr "yes")]
             #[cfg(windows = "yes")]
         }
     };
@@ -61,7 +61,7 @@ with_ident!(windows);
 macro_rules! with_literal {
     ($expr:expr) => {
         t! {
-            #[efg(feature = $expr)]
+            #[efg(feature $expr)]
             #[cfg(feature = "std")]
         }
     };
