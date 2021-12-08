@@ -62,6 +62,8 @@
 //! # }
 //! ```
 
+#![allow(clippy::let_underscore_drop)]
+
 mod error;
 mod expr;
 

@@ -1,5 +1,3 @@
-#![allow(clippy::let_underscore_drop)]
-
 use crate::error::Error;
 use proc_macro::{
     token_stream, Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree,
