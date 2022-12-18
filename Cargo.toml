@@ -1,6 +1,6 @@
 [package]
 name = "efg"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 description = "Conditional compilation using boolean expression syntax, rather than any(), all(), not()."
 documentation = "https://docs.rs/efg"
