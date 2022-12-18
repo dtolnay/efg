@@ -6,7 +6,6 @@ description = "Conditional compilation using boolean expression syntax, rather t
 documentation = "https://docs.rs/efg"
 edition = "2018"
 license = "MIT OR Apache-2.0"
-readme = "README.md"
 repository = "https://github.com/dtolnay/efg"
 rust-version = "1.55"
 
